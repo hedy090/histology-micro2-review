@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Histology + Micro II Review</title>
+<style>
+:root {
+  --bg: #f7f5f2; --surface: #ffffff; --surface-2: #f1ede8; --text: #1f1d1b; --muted: #6b655e;
+  --border: #e3ddd5; --accent: #a8326e; --accent-soft: #f6e4ee; --key: #3d5a99; --key-soft: #e6ecf7;
+  --path: #9a5b13; --path-soft: #fbf0e1; --good: #2f7d4f; --bad: #b3412f; --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04); --hl: #fde68a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161514; --surface: #201e1c; --surface-2: #2a2725; --text: #ece8e3; --muted: #a39b92;
+    --border: #3a3633; --accent: #e07fb0; --accent-soft: #3a2230; --key: #8fa9e0; --key-soft: #222b3d;
+    --path: #e0a35a; --path-soft: #3a2c1c; --good: #6cc193; --bad: #e88673; --shadow: none; --hl: rgba(250, 204, 21, .38);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161514; --surface: #201e1c; --surface-2: #2a2725; --text: #ece8e3; --muted: #a39b92;
+  --border: #3a3633; --accent: #e07fb0; --accent-soft: #3a2230; --key: #8fa9e0; --key-soft: #222b3d;
+  --path: #e0a35a; --path-soft: #3a2c1c; --good: #6cc193; --bad: #e88673; --shadow: none; --hl: rgba(250, 204, 21, .38);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+button, input, select { font: inherit; color: inherit; }
+a { color: var(--accent); }
+
+header.top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+.top-inner { max-width: 1280px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.brand { font-weight: 700; font-size: 17px; letter-spacing: -.01em; margin-right: 8px; }
+.brand span { color: var(--accent); }
+.tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 3px; border-radius: 10px; }
+.tabs button { border: 0; background: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; color: var(--muted); font-weight: 600; }
+.tabs button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.search { flex: 1; min-width: 180px; max-width: 360px; margin-left: auto; padding: 7px 12px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); }
+.icon-btn { border: 1px solid var(--border); background: var(--surface); border-radius: 9px; padding: 6px 10px; cursor: pointer; }
+
+main { max-width: 1280px; margin: 0 auto; padding: 16px; }
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; }
+.layout > div { min-width: 0; }
+nav.side { position: sticky; top: 70px; align-self: start; max-height: calc(100vh - 90px); overflow: auto; font-size: 14px; }
+nav.side a { display: block; text-decoration: none; color: var(--muted); padding: 3px 8px; border-radius: 6px; }
+nav.side a:hover { background: var(--surface-2); color: var(--text); }
+nav.side a.sys { color: var(--text); font-weight: 650; margin-top: 10px; }
+nav.side a.org { padding-left: 18px; }
+@media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); } nav.side { display: none; } }
+
+.sys-head { margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--accent); display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.sys-head h2 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
+.sys-head .note { color: var(--muted); font-size: 14px; }
+.sys-head:first-child { margin-top: 0; }
+
+.organ { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); scroll-margin-top: 80px; }
+.organ h3 { margin: 0 0 10px; font-size: 18px; }
+.organ h3 .count { font-weight: 500; color: var(--muted); font-size: 13px; margin-left: 6px; }
+.thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; }
+.thumb { flex: 0 0 auto; width: 210px; cursor: zoom-in; border: 0; padding: 0; background: none; text-align: left; }
+.thumb img { width: 210px; height: 150px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); display: block; background: var(--surface-2); }
+.thumb span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.3; }
+.tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #fff; background: var(--path); border-radius: 4px; padding: 0 5px; margin-right: 4px; }
+.answer { border: 2px solid var(--key); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; background: var(--key-soft); }
+.answer table { font-size: 14px; }
+.answer td { border: 0; padding: 3px 8px 3px 0; }
+.answer td:first-child { white-space: nowrap; color: var(--key); font-weight: 700; width: 1%; }
+.answer ol { margin: 0; padding-left: 18px; }
+.teach { font-size: 13px; color: var(--path); margin: -4px 0 10px; }
+.slide-note { background: var(--path-soft); border-radius: 8px; padding: 8px 10px; font-size: 14px; margin-bottom: 12px; }
+.tips { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; }
+.tips ul { margin: 6px 0 0; padding-left: 18px; font-size: 14px; }
+.cols { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+@media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+.label { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 6px; }
+.label.key { color: var(--key); } .label.vs { color: var(--accent); } .label.path { color: var(--path); }
+ul.feat { margin: 0; padding-left: 18px; } ul.feat li { margin-bottom: 4px; }
+.vs-list { display: grid; gap: 6px; }
+.vs-item { background: var(--accent-soft); border-radius: 8px; padding: 6px 10px; font-size: 14px; }
+.vs-item b { display: block; font-size: 13px; }
+.path { background: var(--path-soft); border-radius: 8px; padding: 8px 10px; font-size: 14px; margin-top: 10px; }
+
+.cmp { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); scroll-margin-top: 80px; }
+.cmp h3 { margin: 0 0 4px; font-size: 17px; }
+.cmp .intro { color: var(--muted); font-size: 14px; margin: 0 0 10px; }
+.cmp-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { border-bottom: 1px solid var(--border); padding: 7px 9px; text-align: left; vertical-align: top; }
+thead th { background: var(--key-soft); color: var(--key); font-weight: 700; position: sticky; top: 0; }
+tbody td:first-child { font-weight: 650; white-space: nowrap; }
+tbody tr:hover td { background: var(--surface-2); }
+td strong { color: var(--accent); }
+.cmp-tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 1px 7px; margin-bottom: 6px; }
+details.sys-cmp > summary { cursor: pointer; font-weight: 650; color: var(--key); margin: 4px 0 12px; }
+
+/* Flashcards */
+.fc-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.chip { border: 1px solid var(--border); background: var(--surface); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 13px; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.fc-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 8px 0 12px; color: var(--muted); font-size: 14px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 6px 12px; cursor: pointer; }
+.seg button.on { background: var(--key); color: #fff; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); min-height: 420px; padding: 20px; cursor: pointer; }
+.card.front { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.card.front .q-name { font-size: 34px; font-weight: 700; letter-spacing: -.02em; }
+.card.front .q-sys { color: var(--muted); margin-top: 6px; }
+.card.front .q-hint { color: var(--muted); font-size: 13px; margin-top: 18px; }
+.card.front img { max-width: 100%; max-height: 60vh; border-radius: 10px; }
+.carousel { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; }
+.carousel .frame { position: relative; width: 100%; display: flex; justify-content: center; align-items: center; min-height: 200px; }
+.carousel .frame img { max-height: 62vh; background: var(--surface-2); }
+.carousel .nav { position: absolute; top: 50%; transform: translateY(-50%); border: 0; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; font-size: 24px; line-height: 1; cursor: pointer; }
+.carousel .nav.prev { left: 6px; } .carousel .nav.next { right: 6px; }
+.carousel .nav:disabled { opacity: .25; cursor: default; }
+.carousel .count { margin-top: 8px; font-size: 13px; color: var(--muted); }
+.carousel .dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 6px; max-width: 90%; }
+.carousel .dots button { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 0; background: var(--border); cursor: pointer; }
+.carousel .dots button.on { background: var(--accent); }
+.section-intro { margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; background: var(--key-soft); color: var(--key); font-size: 14px; }
+.section-intro b { font-size: 16px; }
+.kg-chip { display: inline-block; font-size: 12px; font-weight: 700; color: #222; border-radius: 999px; padding: 1px 9px; margin: 0 4px 4px 0; white-space: nowrap; }
+.kg-chip.swap::after { content: " ⇄"; }
+.kaogu-box { border: 2px dashed var(--path); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+.kaogu-box details { margin-top: 6px; }
+.kaogu-box summary { cursor: pointer; font-weight: 650; color: var(--path); }
+.grade td:first-child { white-space: nowrap; width: 1%; color: var(--key); font-weight: 700; }
+.grade td { border-bottom: 1px solid var(--border); padding: 4px 8px 4px 0; font-size: 14px; vertical-align: top; }
+.grade .pts { font-weight: 700; color: var(--good); white-space: nowrap; }
+.grade .neg { color: var(--bad); }
+.grade ul { margin: 0; padding-left: 18px; }
+.kg-grid td, .kg-grid th { text-align: center; }
+.kg-grid td:first-child, .kg-grid th:first-child { text-align: left; }
+.kg-dot { display: inline-block; width: 16px; height: 16px; border-radius: 50%; vertical-align: middle; }
+.kg-year { border-left: 8px solid; padding-left: 12px; }
+.kg-year h3 { margin: 0 0 2px; }
+.kg-year ol { margin: 8px 0; padding-left: 22px; }
+.kg-year li { margin-bottom: 4px; }
+.fam { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 10px; }
+.fam-title { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+.fam button { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 3px 10px; font-size: 13px; cursor: pointer; }
+.fam button.on { background: var(--c); border-color: var(--c); color: #fff; font-weight: 600; }
+.fam-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-left: 6px; border: 1px solid var(--border); vertical-align: middle; }
+.fam-count { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.hl-hint { color: var(--muted); font-size: 12px; margin: -4px 0 10px; }
+mark.hl { background: var(--hl); color: inherit; border-radius: 2px; padding: 0 1px; cursor: pointer; }
+.hl-tool { position: fixed; z-index: 60; }
+.hl-tool button { border: 0; border-radius: 8px; padding: 6px 12px; background: var(--text); color: var(--bg); font-weight: 650; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+.kg-tabs { display: flex; gap: 4px; margin: 0 0 14px; border-bottom: 2px solid var(--border); }
+.kg-tabs button { border: 0; background: none; padding: 8px 18px; font: inherit; font-weight: 700; font-size: 16px; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -2px; cursor: pointer; }
+.kg-tabs button small { display: block; font-weight: 500; font-size: 11px; }
+.kg-tabs button.on { color: var(--path); border-bottom-color: var(--path); }
+.kg-dual { color: var(--path); font-size: 22px; font-weight: 800; line-height: 1; margin-left: 3px; vertical-align: -4px; }
+.kg-star { color: #d4a017; font-weight: 700; margin-left: 3px; }
+.practice { border: 1px solid var(--accent); border-radius: 10px; padding: 8px 12px; margin: 10px 0 12px; background: var(--accent-soft); }
+.practice > summary { cursor: pointer; font-weight: 650; color: var(--accent); }
+.pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin-top: 10px; }
+.pf-grid label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.pf-grid .wide { grid-column: 1 / -1; }
+.pf-grid input, .pf-grid textarea { font: inherit; font-size: 14px; font-weight: 400; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px; width: 100%; }
+.pf-grid textarea { resize: vertical; min-height: 70px; }
+@media (max-width: 640px) { .pf-grid { grid-template-columns: 1fr; } }
+.pf-actions { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+.pf-actions button, .reveal-btn { border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 6px 14px; cursor: pointer; font-weight: 600; }
+.pf-actions button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.reveal-btn { margin: 4px 0 12px; }
+.result { margin-top: 10px; background: var(--surface); border-radius: 8px; padding: 10px 12px; }
+.vd { font-weight: 700; } .vd.ok { color: var(--good); } .vd.part { color: #c98a12; } .vd.bad { color: var(--bad); } .vd.none { color: var(--muted); }
+.vd-note { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.vd-ans { font-size: 13px; margin-top: 3px; }
+.cmp-desc { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; font-size: 14px; }
+.cmp-desc .mine { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; white-space: normal; }
+.cmp-desc ol { margin: 0; padding-left: 18px; }
+@media (max-width: 640px) { .cmp-desc { grid-template-columns: 1fr; } }
+.hidden-ans { display: none !important; }
+.hide-caps .thumb span { visibility: hidden; }
+.mode-toggle { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 14px; cursor: pointer; color: var(--text); }
+.fc-practice { width: 100%; max-width: 760px; margin: 14px auto 0; text-align: left; cursor: default; }
+.fc-practice .pf-grid { margin-top: 0; }
+.kg-flag { font-size: 12px; color: var(--path); font-weight: 600; margin-left: 6px; }
+.card.back { cursor: default; }
+.card.back h2 { margin: 0 0 4px; font-size: 26px; }
+.card.back .q-sys { color: var(--muted); margin-bottom: 12px; }
+.fc-actions { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+.fc-actions button { border: 1px solid var(--border); background: var(--surface); padding: 9px 18px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+.fc-actions .again { color: var(--bad); border-color: var(--bad); }
+.fc-actions .good { color: var(--good); border-color: var(--good); }
+.fc-actions .primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.kbd { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
+.progress { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; flex: 1; min-width: 120px; max-width: 320px; }
+.progress div { height: 100%; background: var(--good); }
+
+/* Lightbox */
+.lb { position: fixed; inset: 0; background: rgba(10,10,10,.92); z-index: 100; display: none; flex-direction: column; }
+.lb.open { display: flex; }
+.lb-top { display: flex; align-items: center; gap: 12px; padding: 10px 16px; color: #eee; }
+.lb-top .t { flex: 1; font-size: 14px; }
+.lb-top button { background: rgba(255,255,255,.12); border: 0; color: #fff; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+.lb-stage { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; }
+.lb-stage img { max-width: 96vw; max-height: calc(100vh - 70px); cursor: zoom-in; }
+.lb-stage.zoom { align-items: flex-start; justify-content: flex-start; }
+.lb-stage.zoom img { max-width: none; max-height: none; width: 200%; cursor: zoom-out; }
+.empty { color: var(--muted); padding: 40px; text-align: center; }
+.pa-no { display: inline-block; font-size: 12px; font-weight: 600; color: var(--path); background: var(--path-soft); border-radius: 6px; padding: 1px 8px; margin-left: 8px; vertical-align: middle; }
+.pa-organ { color: var(--muted); font-size: 14px; margin: -6px 0 10px; }
+.exam-links { margin-top: 10px; background: var(--key-soft); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+.exam-links a { display: inline-block; margin: 2px 10px 2px 0; }
+.card.front ul.feat { text-align: left; max-width: 640px; margin: 14px auto 0; }
+mark { background: #ffe58a; color: #000; border-radius: 2px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">Histology + Micro II <span>Quick Review</span></div>
+    <div class="tabs" role="tablist">
+      <button data-tab="atlas" class="on">Histology Atlas</button>
+      <button data-tab="compare">Histology Compare</button>
+      <button data-tab="path">Pathology</button>
+      <button data-tab="kaogu">考古 Past Exams</button>
+      <button data-tab="cards">Flashcards</button>
+    </div>
+    <input class="search" id="search" type="search" placeholder="Search organ, feature, e.g. 'goblet', 'stereocilia'…">
+    <button class="icon-btn" id="theme" title="Toggle light/dark">◐</button>
+  </div>
+</header>
+
+<main>
+  <section id="tab-atlas"><div class="layout"><nav class="side" id="side"></nav><div id="atlas"></div></div></section>
+  <section id="tab-compare" hidden><div class="layout"><nav class="side" id="side-cmp"></nav><div id="compare"></div></div></section>
+  <section id="tab-kaogu" hidden><div class="layout"><nav class="side" id="side-kaogu"></nav><div id="kaogu"></div></div></section>
+  <section id="tab-path" hidden><div class="layout"><nav class="side" id="side-path"></nav><div id="path"></div></div></section>
+  <section id="tab-cards" hidden><div id="cards"></div></section>
+</main>
+
+<div class="lb" id="lb">
+  <div class="lb-top"><button id="lb-prev">‹</button><button id="lb-next">›</button><div class="t" id="lb-t"></div><button id="lb-close">✕ Close</button></div>
+  <div class="lb-stage" id="lb-stage"><img id="lb-img" alt=""></div>
+</div>
+
+<script src="data.js"></script>
+<script src="pathology.js"></script>
+<script src="pathology-images.js"></script>
+<script src="kaogu.js"></script>
+<script src="site-config.js"></script>
+<script src="practice.js"></script>
+<script>
+// If the page was opened without its sibling files (e.g. straight from inside a .zip on Windows), say so instead of showing a blank page.
+(function () {
+  const need = { "data.js": "ORGANS", "pathology.js": "PATHO", "pathology-images.js": "PATH_IMAGES", "kaogu.js": "KAOGU_YEARS", "practice.js": "judge" };
+  const missing = Object.keys(need).filter(f => { try { return typeof eval(need[f]) === "undefined"; } catch (e) { return true; } });
+  const help = `<li>If you received a <b>.zip</b>: right-click it → <b>Extract All…</b>, then open <b>index.html</b> from the extracted folder (opening it from inside the zip window doesn't work).</li>
+    <li>Keep the whole folder together — index.html, the .js files and the photo folders must stay side by side.</li>
+    <li>If the folder is in OneDrive, right-click it → <b>Always keep on this device</b>.</li>`;
+  window.LOAD_HELP = help;
+  if (missing.length) {
+    document.querySelector("main").innerHTML = `<div style="max-width:640px;margin:40px auto;padding:20px;border:2px solid #c0392b;border-radius:10px;line-height:1.6">
+      <h2 style="margin-top:0">Files are missing</h2><p>The page can't find: <b>${missing.join(", ")}</b></p><ul>${help}</ul></div>`;
+    window.APP_BROKEN = true;
+  }
+  // Warn once if pictures fail to load (photo folders missing / not extracted)
+  let warned = false;
+  document.addEventListener("error", e => {
+    if (warned || !e.target || e.target.tagName !== "IMG") return;
+    warned = true;
+    const d = document.createElement("div");
+    d.style.cssText = "position:fixed;bottom:12px;left:12px;right:12px;z-index:999;background:#c0392b;color:#fff;padding:12px 16px;border-radius:8px;line-height:1.5";
+    d.innerHTML = `<b>Pictures can't be found.</b> <ul style="margin:6px 0">${help}</ul><button style="float:right" onclick="this.parentNode.remove()">OK</button><div style="clear:both"></div>`;
+    document.body.appendChild(d);
+  }, true);
+})();
+</script>
+<script>
+const IMG_DIR = "histology photo/";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+const PATH_IMG_DIR = "pathology photo/";
+const src = (f, dir = IMG_DIR) => dir + encodeURIComponent(f);
+// Small previews (≈520px) live in "<folder>/thumbs/" as .jpg; full-size files open in the viewer.
+const thumbSrc = (f, dir = IMG_DIR) => dir + "thumbs/" + encodeURIComponent(f.replace(/\.[^.]+$/, ".jpg"));
+const findItem = id => ORGANS.find(o => o.id === id) || PATHO.find(p => p.id === id) || PATHO_HIDDEN.find(p => p.id === id);
+const itemDir = o => o.id.startsWith("p-") ? PATH_IMG_DIR : IMG_DIR;
+const KAOGU_IMG_DIR = "kaogu photo/";
+const imgDir = (o, im) => im[3] || itemDir(o); // image entries: [file, caption, flag, folder?]; flag 1 = exam/teaching slide, 2 = past-exam slide
+const itemName = o => o.name || o.dx;
+const catName = id => PATH_CATS.find(c => c.id === id).name;
+const sysName = id => SYSTEMS.find(s => s.id === id).name;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("histo:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("histo:" + k, JSON.stringify(v)); } catch {} },
+};
+
+// ── Theme ──
+(function () {
+  const t = store.get("theme", null);
+  if (t) document.documentElement.dataset.theme = t;
+  $("#theme").onclick = () => {
+    const dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.dataset.theme = dark ? "light" : "dark";
+    store.set("theme", dark ? "light" : "dark");
+  };
+})();
+
+// ── Tabs ──
+function showTab(name) {
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === name));
+  ["atlas", "compare", "path", "kaogu", "cards"].forEach(t => $("#tab-" + t).hidden = t !== name);
+  $("#search").style.visibility = name === "cards" || name === "kaogu" ? "hidden" : "visible";
+  store.set("tab", name);
+  if (name === "cards") renderCard();
+}
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
+
+// ── Organ rendering (shared by atlas + flashcard back) ──
+function thumbs(o) {
+  if (!o.images || !o.images.length) return "";
+  return `<div class="thumbs">${o.images.map((im, i) => {
+    const [f, cap, exam] = im;
+    const tag = im[4] ? `<b class="kg-chip" style="background:${kgColor(im[4])}">考古 ${im[4]}</b>` : exam ? '<b class="tag">Slide</b>' : "";
+    return `<button class="thumb" data-organ="${o.id}" data-i="${i}"><img loading="lazy" src="${thumbSrc(f, imgDir(o, im))}" alt="${esc(cap)}"><span>${tag}${esc(cap)}</span></button>`;
+  }).join("")}</div>`;
+}
+function organBody(o) {
+  return `${thumbs(o)}
+  <div class="cols">
+    <div><p class="label key">Key identifying features</p><ul class="feat">${o.features.map(f => `<li>${md(f)}</li>`).join("")}</ul></div>
+    <div><p class="label vs">Don't confuse with</p><div class="vs-list">${o.vs.map(([n, t]) => `<div class="vs-item"><b>vs ${esc(n)}</b>${esc(t)}</div>`).join("")}</div>
+    <div class="path"><p class="label path">Pathology link</p>${esc(o.path)}</div>${examLinks(o)}</div>
+  </div>`;
+}
+function examLinks(o) {
+  const ps = PATHO.filter(p => p.normal === o.id);
+  return ps.length ? `<div class="exam-links"><p class="label key">Exam pathology slides of this organ</p>${ps.map(p => `<a href="#" data-goto-path="${p.id}">${esc(p.dx)}</a>`).join("")}</div>` : "";
+}
+function answerBox(p) {
+  const a = p.answer;
+  return `<div class="answer"><p class="label key">${p.listOnly ? "Exam list entry — organ & diagnosis as listed; description not added yet" : p.answerSrc ? `Answer (course format) — from ${esc(p.answerSrc)}` : p.supp ? "Suggested answer (course format) — no official answer page for supplement slides" : "Exam answer (course format)"}</p><table>
+    <tr><td>器官 Organ</td><td>${esc(a.organ)}</td></tr>
+    <tr><td>診斷 Diagnosis</td><td><b>${esc(a.dx)}</b></td></tr>
+    <tr><td>描述 Description</td><td>${a.desc.length ? `<ol>${a.desc.map(d => `<li>${md(d)}</li>`).join("")}</ol>` : `<span class="pa-organ">Not added yet</span>`}</td></tr></table></div>`;
+}
+// ── 考古 helpers ──
+const EXAM_N = PATHO.filter(p => !p.supp).length; // supplement cases aren't on the exam slide list
+const kgExTag = ex => ({ m1: "M1", m2: "M2", m3: "M3" })[ex] || "";
+const exName = ex => ({ m1: "Micro I", m2: "Micro II", m3: "Micro III" })[ex];
+const hitsFor = (pid, ex) => (KAOGU_HITS[pid] || []).filter(h => (h.ex || "m1") === ex);
+let kgExam = siteExam(store.get("kg-exam", "m1"));
+const kgColor = y => KAOGU_YEARS.find(k => k.id === y).color;
+function kgChips(pid) {
+  return (KAOGU_HITS[pid] || []).map(h => `<span class="kg-chip ${h.swapped ? "swap" : ""}" style="background:${kgColor(h.y)}" title="${esc(h.swapped ? "Organ changed from the teaching slide" : "")}">${h.y}${h.ex ? " " + kgExTag(h.ex) : ""}${h.variant ? " " + h.variant : h.makeup ? " 補考" : ""}${h.organ ? " · " + esc(h.organ) : ""}${h.double ? " *" : ""}${h.ex && earlier(pid, h.ex) ? " ★" : ""}</span>`).join("");
+}
+function gradeHTML(a) {
+  const pts = v => v === "" ? "" : `<span class="pts ${String(v).startsWith("-") ? "neg" : ""}">[${esc(v)}]</span>`;
+  const list = arr => arr.map(([t, v]) => `${esc(t)} ${pts(v)}`).join("<br>");
+  const rows = [
+    ["器官 Organ", list(a.organ)],
+    ["診斷 Diagnosis", list(a.dx)],
+    [`描述 Description${a.descTotal ? ` ${pts(a.descTotal)}` : ""}`, `<ol style="margin:0;padding-left:18px">${a.desc.map(([t, v]) => `<li>${esc(t)} ${pts(v)}</li>`).join("")}</ol>`],
+  ];
+  if (a.optional) rows.push(["Optional (可寫可不寫)", `<ul>${a.optional.map(t => `<li>${esc(t)}</li>`).join("")}</ul>`]);
+  if (a.zero) rows.push(["Worth 0", `<ul>${a.zero.map(t => `<li>${esc(t)}</li>`).join("")}</ul>`]);
+  if (a.minus) rows.push([`<span class="neg">Penalised [−1]</span>`, `<ul>${a.minus.map(t => `<li>${esc(t)}</li>`).join("")}</ul>`]);
+  if (a.notes) rows.push([a.sample ? "Notes" : "Grader's notes", a.notes.map(esc).join("<br>")]);
+  return `<table class="grade">${rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("")}</table>`;
+}
+const ansLabel = a => a.label ? a.label : a.sample ? "full-marks student answer (scored 17/17)" : "official answer & grading";
+const anyOrganNote = p => ANY_ORGAN[p.id] ? `<div class="slide-note" style="background:var(--key-soft)"><p class="label key">Organ varies</p>${esc(ANY_ORGAN[p.id])}. In the exam, name the organ you actually see on the slide.</div>` : "";
+function kaoguBox(p) {
+  if (p.kaoguOf) return kaoguBox({ ...findItem(p.kaoguOf), supp: false }); // supplement view of an exam diagnosis → show its 考古
+  const hits = KAOGU_HITS[p.id], ans = KAOGU_ANSWERS[p.id] || [];
+  if (p.listOnly && !hits) return `<div class="pa-organ" style="margin-bottom:10px">考古: not tested in ${exName(examOf(p))} years 10–11</div>`;
+  if (p.supp) return `<div class="pa-organ" style="margin-bottom:10px">Supplement — extra teaching slides, not on the exam slide list (no glass slide in the box)</div>`;
+  if (!hits) return `<div class="pa-organ" style="margin-bottom:10px">考古: not tested in ${examOf(p) === "m1" ? "years 06–12" : exName(examOf(p)) + " years 07–11"}</div>`;
+  return `<div class="kaogu-box"><p class="label path">考古 — tested in past exams <span style="font-weight:400;text-transform:none;letter-spacing:0">(⇄ = organ changed)</span></p>${kgChips(p.id)}
+    ${ans.map(a => `<details><summary>Year ${a.y} ${ansLabel(a)}${a.ex ? ` — Q${esc(a.q)}` : ""}${a.double ? " — double diagnosis" : ""}${a.swapped ? " — organ changed" : ""}</summary>${gradeHTML(a)}</details>`).join("")}
+    <div style="margin-top:6px">${[...new Set(hits.map(h => h.ex || "m1"))].filter(ex => SITE_EXAMS.includes(ex)).map(ex => `<a href="#" data-goto-kaogu="kg-${p.id}" data-kg-ex="${ex}">see in 考古 · ${exName(ex)}</a>`).join(" · ")}</div></div>`;
+}
+// inDb = rendered in the Pathology tab: adds the practice box, and in practice mode hides answers until checked/revealed.
+function pathBody(p, withAnswer = true, inDb = false) {
+  const n = p.normal && ORGANS.find(o => o.id === p.normal);
+  const h = inDb ? hideCls(p.id) : "";
+  return `<div class="${h}" data-hide-for="${p.id}">${p.teach ? `<div class="teach">${esc(p.teach)}</div>` : ""}${withAnswer ? answerBox(p) : ""}${withAnswer ? anyOrganNote(p) + kaoguBox(p) : ""}
+  ${p.slide && p.slide.length ? `<div class="slide-note"><p class="label path">On this slide (lecturer's notes)</p>${p.slide.map(md).join("<br>")}</div>` : ""}</div>
+  <div class="${h ? "hide-caps" : ""}" data-hide-caps="${p.id}">${thumbs(p)}</div>
+  ${inDb ? practiceBox(p) + revealBtn(p.id) : ""}
+  ${p.listOnly ? "" : `<div class="${h}" data-hide-for="${p.id}"><p class="teach">Images: ${esc(PATH_LECTURES[p.src])}${/·/.test(PATH_LECTURES[p.src]) ? " lecture" : ""} — <b class="tag">Slide</b> = photo of the exam/teaching slide</p>
+  <div class="cols">
+    <div><p class="label key">Morphology & how to recognise it</p><ul class="feat">${p.features.map(f => `<li>${md(f)}</li>`).join("")}</ul></div>
+    <div><p class="label vs">Exam points & differentials</p>${p.pearls.length ? `<div class="vs-list">${p.pearls.map(t => `<div class="vs-item">${md(t)}</div>`).join("")}</div>` : `<div class="pa-organ">—</div>`}
+    ${n ? `<div class="exam-links"><p class="label key">Compare with normal</p><a href="#" data-goto-organ="${n.id}">${esc(n.name)} (normal histology)</a></div>` : ""}</div>
+  </div></div>`}`;
+}
+function cmpTable(c) {
+  return `<div class="cmp" id="cmp-${c.id}"><h3>${esc(c.title)}</h3>${c.intro ? `<p class="intro">${esc(c.intro)}</p>` : ""}
+  <div class="cmp-wrap"><table><thead><tr>${c.headers.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead>
+  <tbody>${c.rows.map(r => `<tr>${r.map(x => `<td>${md(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
+}
+
+// ── Atlas ──
+function matches(o, q) {
+  if (!q) return true;
+  const hay = [o.name, sysName(o.system), ...o.features, ...o.vs.flat(), o.path, ...o.images.map(i => i[1])].join(" ").toLowerCase();
+  return q.split(/\s+/).every(w => hay.includes(w));
+}
+function renderAtlas() {
+  const q = $("#search").value.trim().toLowerCase();
+  let html = "", nav = "", any = false;
+  for (const s of SYSTEMS) {
+    const orgs = ORGANS.filter(o => o.system === s.id && matches(o, q));
+    if (!orgs.length) continue;
+    any = true;
+    nav += `<a class="sys" href="#sys-${s.id}">${esc(s.name)}</a>` + orgs.map(o => `<a class="org" href="#o-${o.id}">${esc(o.name)}${famDot(o.id)}</a>`).join("");
+    html += `<div class="sys-head" id="sys-${s.id}"><h2>${esc(s.name)}</h2><span class="note">${esc(s.note)}</span></div>`;
+    const cmps = COMPARISONS.filter(c => c.system === s.id);
+    if (cmps.length && !q) html += `<details class="sys-cmp" ${s.id === "gi" ? "open" : ""}><summary>Comparison tables for ${esc(s.name)} (${cmps.length})</summary>${cmps.map(cmpTable).join("")}</details>`;
+    html += orgs.map(o => `<article class="organ" id="o-${o.id}" data-hl-scope="${o.id}"><h3>${esc(o.name)}<span class="count">${o.images.length} image${o.images.length > 1 ? "s" : ""}</span></h3>${famPicker(o.id)}<div class="hl-hint">🖍 Select any text to highlight it · click a highlight to remove it</div>${organBody(o)}${practiceBox(o)}</article>`).join("");
+  }
+  const intro = `<div class="section-intro"><b>Normal histology atlas</b> — ${ORGANS.length} organs grouped by system, with key identifying features and look-alikes. For exam pathology slides see the Pathology tab.<div class="fam-count" id="fam-count-atlas">${famCounts(ORGANS.map(o => o.id))}</div></div>`;
+  $("#atlas").innerHTML = intro + (any ? html : `<div class="empty">No organ matches “${esc(q)}”.</div>`);
+  $("#side").innerHTML = nav;
+}
+
+// ── Compare ──
+function renderCompare() {
+  const q = $("#search").value.trim().toLowerCase();
+  let html = "", nav = "";
+  for (const s of SYSTEMS) {
+    const cmps = COMPARISONS.filter(c => c.system === s.id && (!q || JSON.stringify(c).toLowerCase().includes(q)));
+    if (!cmps.length) continue;
+    nav += `<a class="sys" href="#cmp-${cmps[0].id}">${esc(s.name)}</a>` + cmps.map(c => `<a class="org" href="#cmp-${c.id}">${esc(c.title)}</a>`).join("");
+    html += cmps.map(c => `<span class="cmp-tag">${esc(s.name)}</span>` + cmpTable(c)).join("");
+  }
+  const intro = `<div class="section-intro"><b>Normal histology comparisons</b> — side-by-side tables of organs that look alike. Pathology comparisons (pigments, fungi, necrosis…) are in the Pathology tab.</div>`;
+  $("#compare").innerHTML = intro + (html || `<div class="empty">No comparison matches.</div>`);
+  $("#side-cmp").innerHTML = nav;
+}
+// ── Pathology ──
+// Organ grouping for pathology slides (teaching/exam-list organ), ordered by body system.
+const PATH_ORGANS = [
+  ["Head & neck", [["parotid", "Parotid gland"], ["nasopharynx", "Nasopharynx"], ["jaw", "Bone (jaw)"], ["cheek", "Cheek"], ["eye", "Eye"]]],
+  ["GI tract", [["esophagus", "Esophagus"], ["stomach", "Stomach"], ["small-intestine", "Small intestine (ileum)"], ["appendix", "Appendix"], ["large-intestine", "Large intestine (colon)"], ["anus", "Anus"]]],
+  ["Liver, biliary & pancreas", [["liver", "Liver"], ["gallbladder", "Gallbladder"], ["pancreas", "Pancreas"]]],
+  ["Cardiovascular", [["heart", "Heart"], ["heart-valve", "Heart valve"], ["artery", "Carotid artery"]]],
+  ["Respiratory", [["sinonasal", "Nasal cavity & sinuses"], ["lung", "Lung"], ["pleura", "Pleura"]]],
+  ["Urinary & male genital", [["kidney", "Kidney"], ["urinary-tract", "Urinary bladder / urethra"], ["prostate", "Prostate"]]],
+  ["Female genital", [["vulva", "Vulva"], ["cervix", "Uterine cervix"], ["uterus", "Uterus"], ["ovary", "Ovary"]]],
+  ["Endocrine", [["thyroid", "Thyroid gland"], ["adrenal", "Adrenal gland"]]],
+  ["Lymphoid", [["spleen", "Spleen"], ["lymph-node", "Lymph node"]]],
+  ["Nervous system", [["brain", "Brain"]]],
+  ["Skin & soft tissue", [["skin", "Skin"], ["soft-tissue", "Soft tissue"]]],
+];
+const ORGAN_KEY_RULES = [[/valve/, "heart-valve"], [/heart|myocard/, "heart"], [/artery/, "artery"], [/colon|large intestine/, "large-intestine"], [/ileum|small intestine|duoden/, "small-intestine"],
+  [/stomach/, "stomach"], [/nasopharyn/, "nasopharynx"], [/sinus|nasal/, "sinonasal"], [/brain|cerebrum/, "brain"], [/skin/, "skin"], [/soft tissue/, "soft-tissue"], [/lymph node/, "lymph-node"],
+  [/gallbladder/, "gallbladder"], [/bladder|urethra|urogenital|urothel/, "urinary-tract"], [/cervix/, "cervix"], [/uter/, "uterus"], [/adrenal/, "adrenal"], [/thyroid/, "thyroid"], [/parotid/, "parotid"], [/jaw|bone/, "jaw"]];
+function organKey(p) {
+  const o = p.organ.toLowerCase();
+  const r = ORGAN_KEY_RULES.find(([re]) => re.test(o));
+  return r ? r[1] : o.replace(/\W+/g, "-");
+}
+// [{key, label, sys}] for every organ that has at least one slide (unknown organs go last, under "Other").
+function pathOrganList(items = PATHO) {
+  const known = PATH_ORGANS.flatMap(([sys, os]) => os.map(([key, label]) => ({ key, label, sys })));
+  const used = new Set(items.map(organKey));
+  const extra = [...used].filter(k => !known.some(o => o.key === k)).map(k => ({ key: k, label: items.find(p => organKey(p) === k).organ, sys: "Other" }));
+  return [...known.filter(o => used.has(o.key)), ...extra];
+}
+let pathGroup = store.get("path-group", "topic"); // "topic" | "organ"
+let pathExam = siteExam(store.get("path-exam", "m1"));
+let pathKaoguOnly = store.get("path-kaogu-only", false); // show only slides tested in past exams
+const isKaogu = p => !!((KAOGU_HITS[p.id] || []).length || (p.kaoguOf && (KAOGU_HITS[p.kaoguOf] || []).length)); // "m1" | "m2" | "m3" | "all"
+const inExam = (p, ex) => ex === "all" || examOf(p) === ex;
+const catExam = c => c.exam || "m1";
+const examSeg = (id, cur) => `<span class="seg" id="${id}">${[...PATH_EXAMS, ...(PATH_EXAMS.length > 1 ? [{ id: "all", name: "All" }] : [])].map(e =>
+  `<button data-ex="${e.id}" class="${cur === e.id ? "on" : ""}">${e.name} <small>${PATHO.filter(p => inExam(p, e.id)).length}</small></button>`).join("")}</span>`;
+function renderPath() {
+  const q = $("#search").value.trim().toLowerCase();
+  const hit = p => !q || q.split(/\s+/).every(w => [p.no, p.teach || "", p.organ, p.dx, catName(p.cat), p.answer.organ, ...p.answer.desc, ...(p.slide || []), ...p.features, ...p.pearls].join(" ").toLowerCase().includes(w));
+  let html = "", nav = "";
+  const SCOPE = PATHO.filter(p => inExam(p, pathExam) && (!pathKaoguOnly || isKaogu(p)));
+  const nKg = PATHO.filter(p => inExam(p, pathExam) && isKaogu(p)).length;
+  window.PATH_VISIBLE = SCOPE;
+  const nEx = SCOPE.filter(p => !p.supp).length, nSupp = SCOPE.length - nEx, nList = SCOPE.filter(p => p.listOnly).length;
+  const showM1 = pathExam === "m1" || pathExam === "all";
+  const cmps = showM1 ? PATH_COMPARISONS.filter(c => !q || JSON.stringify(c).toLowerCase().includes(q)) : [];
+  html += `<div class="section-intro"><div style="margin-bottom:8px">Exam ${examSeg("path-exam", pathExam)}</div><b>Pathology exam slides</b> — ${nEx} exam cases${nSupp ? ` + ${nSupp} supplement` : ""} in the course's 器官 / 診斷 / 描述 format.${nList ? ` <span class="pa-organ">(${nList} Micro II/III slides are list entries only — content not added yet)</span>` : ""}
+      <div class="fam-count" id="fam-count-path">${famCounts(SCOPE.map(x => x.id))}</div>
+      <label class="mode-toggle"><input type="checkbox" id="practice-mode" ${practiceMode ? "checked" : ""}> Practice mode — hide answers until I check or reveal them</label>
+      <div style="margin-top:8px">Group by <span class="seg" id="path-group"><button data-pg="topic" class="${pathGroup === "topic" ? "on" : ""}">Topic</button><button data-pg="organ" class="${pathGroup === "organ" ? "on" : ""}">Organ</button></span>
+        <span class="seg" id="path-kg" style="margin-left:10px"><button data-kg="all" class="${pathKaoguOnly ? "" : "on"}">All slides</button><button data-kg="only" class="${pathKaoguOnly ? "on" : ""}">考古 only <small>${nKg}</small></button></span></div></div>`;
+  if (!q && showM1) {
+    nav += `<a class="sys" href="#path-tips">Exam tips</a>`;
+    html += `<div class="tips" id="path-tips"><p class="label path">Exam preparation (section review)</p><ul>${PATH_EXAM_TIPS.map(t => `<li>${md(t)}</li>`).join("")}</ul>
+      <p class="pa-organ" style="margin:8px 0 0">Source: microteaching lectures in the “pathology slides” folder. Online virtual slides: links & password on the Section review slides.</p></div>`;
+  }
+  if (cmps.length) {
+    nav += `<a class="sys" href="#path-cmp">Comparison tables</a>`;
+    html += `<div class="sys-head" id="path-cmp"><h2>Pathology comparisons</h2><span class="note">Micro I</span></div>
+      <details class="sys-cmp" ${q ? "open" : ""}><summary>Pigments, fungi, necrosis, viral inclusions, granulomas, liver (${cmps.length})</summary>${cmps.map(cmpTable).join("")}</details>`;
+  }
+  const groups = pathGroup === "organ"
+    ? pathOrganList(SCOPE).map(o => ({ id: "po-" + o.key, name: o.label, note: o.sys, items: SCOPE.filter(p => organKey(p) === o.key && hit(p)) }))
+    : PATH_CATS.filter(c => inExam({ exam: catExam(c) }, pathExam)).map(c => ({ id: "pc-" + c.id, name: c.name, note: pathExam === "all" ? PATH_EXAMS.find(e => e.id === catExam(c)).name : "", items: SCOPE.filter(p => p.cat === c.id && hit(p)) }));
+  let lastSys = "";
+  for (const g of groups) {
+    const items = g.items;
+    if (!items.length) continue;
+    if (g.note && g.note !== lastSys) { lastSys = g.note; nav += `<div class="pa-organ" style="margin:10px 0 2px;font-size:11px;text-transform:uppercase;letter-spacing:.5px">${esc(g.note)}</div>`; }
+    nav += `<a class="sys" href="#${g.id}">${esc(g.name)}${pathGroup === "organ" ? ` (${items.length})` : ""}</a>` + items.map(p => `<a class="org" href="#${p.id}">${esc(p.dx)}${famDot(p.id)}</a>`).join("");
+    html += `<div class="sys-head" id="${g.id}"><h2>${esc(g.name)}</h2>${g.note ? `<span class="note">${esc(g.note)}${pathGroup === "organ" ? " · organ of the teaching / exam-list slide" : ""}</span>` : ""}</div>` + items.map(p =>
+      `<article class="organ" id="${p.id}" data-hl-scope="${p.id}"><h3>${esc(p.dx)}<span class="pa-no">${esc(p.no)}</span> ${(KAOGU_HITS[p.id] || []).map(h => `<span class="kg-chip" style="background:${kgColor(h.y)};font-size:11px">${h.y}${h.ex ? " " + kgExTag(h.ex) : ""}${h.ex && earlier(p.id, h.ex) ? " ★" : ""}</span>`).join("")}</h3><div class="pa-organ ${hideCls(p.id)}" data-hide-for="${p.id}">${esc(p.organ)} · ${pathGroup === "organ" ? esc(catName(p.cat)) + " · " : ""}${pathExam === "all" ? PATH_EXAMS.find(e => e.id === examOf(p)).name + " · " : ""}${esc(PATH_LECTURES[p.src])}${ANY_ORGAN[p.id] ? " · <b>⇄ organ varies in exams</b>" : ""}</div>${famPicker(p.id)}<div class="hl-hint">🖍 Select any text to highlight it · click a highlight to remove it</div>${pathBody(p, true, true)}</article>`).join("");
+  }
+  $("#path").innerHTML = html || `<div class="empty">No pathology slide matches “${esc(q)}”.</div>`;
+  $("#side-path").innerHTML = nav;
+}
+// ── 考古 Past Exams tab ──
+const kgSwitch = () => "";
+const kgTabs = () => `<div class="kg-tabs" id="kg-exam">${PATH_EXAMS.map(e => `<button data-kgx="${e.id}" class="${kgExam === e.id ? "on" : ""}">${e.name}<small>${e.id === "m1" ? "years 06–12" : "years 07–11"}</small></button>`).join("")}</div>`;
+// ★ = a later exam (Micro II/III) tested a slide from an earlier section's list
+const earlier = (id, ex) => examOf(findItem(id)) < ex;
+const kgStar = '<span class="kg-star" title="Tested a topic from an earlier section">★</span>';
+document.addEventListener("click", e => {
+  const b = e.target.closest("#kg-exam [data-kgx]");
+  if (!b || b.dataset.kgx === kgExam) return;
+  kgExam = b.dataset.kgx; store.set("kg-exam", kgExam); renderKaogu(); window.scrollTo({ top: 0 });
+});
+// Micro II / III: years 10 & 11
+function renderKaoguExam(ex) {
+  const years = KAOGU_EXAM_YEARS[ex].map(y => ({ ...y, ...KAOGU_YEARS.find(k => k.id === y.id) , source: y.source }));
+  // Same diagnosis on several exam-list cards (different organs) → one row; each year's cell shows the organ used.
+  const KG_SAME_DX = [["p-pa0047", "p-pa0102"], ["p-pa0030", "p-pa0171"]];
+  const hitCards = [...PATHO, ...PATHO_HIDDEN].filter(p => hitsFor(p.id, ex).length).map(p => p.id); // hidden cards still count as past-exam topics
+  const rows = [];
+  for (const id of hitCards) {
+    if (rows.some(r => r.ids.includes(id))) continue;
+    const grp = (KG_SAME_DX.find(g => g.includes(id)) || [id]).filter(x => hitCards.includes(x));
+    const yearHit = y => { const hs = grp.flatMap(g => hitsFor(g, ex).filter(h => h.y === y)); if (!hs.length) return null;
+      return { ...hs[0], organ: [...new Set(hs.map(h => h.organ))][0], swapped: hs.every(h => h.swapped), double: hs.some(h => h.double), makeup: hs.every(h => h.makeup), variant: hs.every(h => h.variant) ? [...new Set(hs.flatMap(h => h.variant.split(", ")))].join(", ") : "" }; };
+    rows.push({ ids: grp, yearHit, total: years.filter(y => yearHit(y.id)).length });
+  }
+  // Past-exam topics with no card (not in the B12 list) still get a row.
+  const noCard = {};
+  for (const [y, papers] of Object.entries(KAOGU_EXAM_PAPERS[ex] || {}))
+    for (const [, organ, dx, ids] of papers) if (!ids.length) (noCard[dx] = noCard[dx] || {})[y] = organ;
+  for (const [dx, byYear] of Object.entries(noCard))
+    rows.push({ ids: [], dx, yearHit: y => byYear[y] ? { organ: byYear[y] } : null, total: Object.keys(byYear).length });
+  rows.sort((a, b) => b.total - a.total);
+  const dxCount = {}; rows.filter(r => r.ids.length).forEach(r => { const d = findItem(r.ids[0]).dx; dxCount[d] = (dxCount[d] || 0) + 1; });
+  const rowLabel = r => !r.ids.length ? `${esc(r.dx)} <span class="kg-flag">Not in the B12 list</span>` : r.ids.length > 1
+    ? `${esc(findItem(r.ids[0]).dx.replace(/ \(.*\)$/, "").replace(/^Amyloidoma$/, "Amyloidosis / amyloidoma"))} <span class="pa-organ">(cards: ${r.ids.map(id => `<a href="#" data-goto-path="${id}">${esc(findItem(id).organ)}</a>`).join(", ")})</span>`
+    : `<a href="#" data-goto-path="${r.ids[0]}">${esc(findItem(r.ids[0]).dx)}</a>${dxCount[findItem(r.ids[0]).dx] > 1 || /^(adenocarcinoma|squamous cell carcinoma)$/i.test(findItem(r.ids[0]).dx) ? ` <span class="pa-organ">(${esc(findItem(r.ids[0]).organ)})</span>` : ""}`;
+  const untested = PATHO.filter(p => examOf(p) === ex && !hitsFor(p.id, ex).length && !KG_SAME_DX.some(g => g.includes(p.id) && g.some(x => hitsFor(x, ex).length)));
+  const nav = `<a class="sys" href="#kg-top">Key takeaways</a><a class="sys" href="#kg-grid">How often each was tested</a><a class="sys" href="#kg-papers">Papers by year</a>`
+    + years.map(y => `<a class="org" href="#kg-y${y.id}">Year ${y.id}</a>`).join("");
+  let html = `${kgTabs()}<div class="section-intro" id="kg-top"><b>考古 Past exams — ${exName(ex)} (pathology)</b> — years 10–11 from the B10 answer & grading sheets and B11 full-marks student sheets; years 07–09 (topics only) from a senior's annotated exam list. ⇄ = organ differs from the exam-list slide · 補考 = make-up exam only · 牙 = dentistry students only · 碩 = master's program only · <b class="kg-dual">*</b> = double diagnosis · ${kgStar} = tested a slide from an earlier section (${ex === "m3" ? "Micro I or II" : "Micro I"}).</div>
+    <div class="tips"><p class="label path">Key takeaways</p><ul>${KAOGU_EXAM_TAKEAWAYS[ex].map(t => `<li>${md(t)}</li>`).join("")}</ul></div>`;
+  html += `<div class="cmp" id="kg-grid"><h3>How often each diagnosis was tested</h3><div class="cmp-wrap"><table class="kg-grid"><thead><tr><th>Diagnosis (exam-list card)</th>${years.map(y => `<th><span class="kg-dot" style="background:${y.color}"></span> ${y.id}</th>`).join("")}<th>Total</th></tr></thead><tbody>
+    ${rows.map(r => { const p = findItem(r.ids[0]) || { id: "nocard-" + r.dx.replace(/\W+/g, "-") }; return `<tr id="kg-${p.id}"><td>${r.ids.slice(1).map(id => `<span id="kg-${id}"></span>`).join("")}${rowLabel(r)}${r.ids.some(id => earlier(id, ex)) ? kgStar : ""}${r.ids.length === 1 && examOf(p) !== ex ? ` <span class="pa-organ">(${exName(examOf(p))} card)</span>` : ""}</td>${years.map(y => { const h = r.yearHit(y.id); return `<td>${h ? `<span class="kg-dot" style="background:${y.color}"></span>${h.double ? `<b class="kg-dual" title="${esc(h.note || "Double diagnosis")}">*</b>` : ""}<div style="font-size:11px">${esc(h.organ)}${h.swapped ? " ⇄" : ""}${h.variant ? " " + h.variant : h.makeup ? " 補考" : ""}</div>` : ""}</td>`; }).join("")}<td><b>${r.total}</b></td></tr>`; }).join("")}
+    </tbody></table></div>
+    <p class="intro" style="margin-top:10px"><b>${exName(ex)} list slides not tested in 07–11:</b> ${untested.map(p => `<a href="#" data-goto-path="${p.id}">${esc(p.dx)}, ${esc(p.organ)}</a>`).join(" · ")}</p></div>`;
+  html += `<div class="sys-head" id="kg-papers"><h2>Papers by year</h2></div>`;
+  for (const y of years) {
+    html += `<div class="cmp kg-year" id="kg-y${y.id}" style="border-left-color:${y.color}"><h3>Year ${y.id} · ${exName(ex)}</h3><div class="pa-organ">Source: ${esc(y.source)}</div><ol>
+      ${KAOGU_EXAM_PAPERS[ex][y.id].map(([q, organ, dx, ids, flag]) => {
+        const ans = (KAOGU_ANSWERS[ids[0]] || []).filter(a => a.ex === ex && a.y === y.id && a.q === q);
+        return `<li value="${parseInt(q) || ""}"><b>${q !== "–" && /\D/.test(q) ? esc(q) + " · " : ""}${esc(organ)}</b> ; ${esc(dx)}${ids.some(id => earlier(id, ex)) ? kgStar : ""}${flag ? `<span class="kg-flag">${esc(flag)}</span>` : ""} — ${ids.length ? "" : `<span class="pa-organ">no card</span>`}${ids.map(id => `<a href="#" data-goto-path="${id}">${esc(findItem(id).dx)} card${earlier(id, ex) ? ` (${exName(examOf(findItem(id)))})` : ""}</a>`).join(" · ")}
+          ${ans.map(a => `<details><summary style="cursor:pointer;color:var(--path);font-weight:600">${esc(ansLabel(a))}</summary>${gradeHTML(a)}</details>`).join("")}</li>`;
+      }).join("")}</ol></div>`;
+  }
+  $("#kaogu").innerHTML = html;
+  $("#side-kaogu").innerHTML = nav;
+}
+function renderKaogu() {
+  if (kgExam !== "m1") return renderKaoguExam(kgExam);
+  const years = KAOGU_YEARS;
+  const tested = PATHO.filter(p => hitsFor(p.id, "m1").length).sort((a, b) => hitsFor(b.id, "m1").length - hitsFor(a.id, "m1").length);
+  const untested = PATHO.filter(p => !hitsFor(p.id, "m1").length && !p.supp && examOf(p) === "m1");
+  let nav = `<a class="sys" href="#kg-top">Key takeaways</a><a class="sys" href="#kg-grid">How often each was tested</a><a class="sys" href="#kg-papers">Papers by year</a>`
+    + years.map(y => `<a class="org" href="#kg-y${y.id}">${esc(y.label)}</a>`).join("") + `<a class="sys" href="#kg-rules">Grading rules</a><a class="sys" href="#kg-later">Second semester (reference)</a>`;
+  let html = `${kgTabs()}<div class="section-intro" id="kg-top"><b>考古 Past exams — Micro I (pathology)</b> — years 06–12 from the B06 / B07 / B09 / B10 / B11 answer sheets, your notebook (year 08) and the B12 question list. Colours match your notebook:
+      ${years.map(y => `<span class="kg-chip" style="background:${y.color}">${y.id}</span>`).join("")} · ⇄ = organ changed from the teaching slide · <b class="kg-dual">*</b> = double diagnosis · 碩 = master's-program question only.</div>
+    <div class="tips"><p class="label path">Key takeaways</p><ul>${KAOGU_TAKEAWAYS.map(t => `<li>${md(t)}</li>`).join("")}</ul></div>`;
+
+  html += `<div class="cmp" id="kg-grid"><h3>How often each diagnosis was tested</h3><div class="cmp-wrap"><table class="kg-grid"><thead><tr><th>Diagnosis</th>${years.map(y => `<th><span class="kg-dot" style="background:${y.color}"></span> ${y.id}</th>`).join("")}<th>Total</th></tr></thead><tbody>
+    ${tested.map(p => `<tr id="kg-${p.id}"><td><a href="#" data-goto-path="${p.id}">${esc(p.dx)}</a></td>${years.map(y => { const h = hitsFor(p.id, "m1").find(x => x.y === y.id); return `<td>${h ? `<span class="kg-dot" style="background:${y.color}"></span>${h.double ? `<b class="kg-dual" title="${esc(h.note || "Double diagnosis")}">*</b>` : ""}${h.organ ? `<div style="font-size:11px">${esc(h.organ)}${h.swapped ? " ⇄" : ""}${h.variant ? " " + esc(h.variant) : ""}</div>` : ""}` : ""}</td>`; }).join("")}<td><b>${hitsFor(p.id, "m1").length}</b></td></tr>`).join("")}
+    </tbody></table></div>
+    <p class="intro" style="margin-top:10px"><b>Not tested in 06–12:</b> ${untested.map(p => `<a href="#" data-goto-path="${p.id}">${esc(p.dx)}</a>`).join(" · ")}</p>
+</div>`;
+
+  html += `<div class="sys-head" id="kg-papers"><h2>Papers by year</h2></div>`;
+  for (const y of years) {
+    const paper = KAOGU_PAPERS[y.id];
+    html += `<div class="cmp kg-year" id="kg-y${y.id}" style="border-left-color:${y.color}"><h3>${esc(y.label)}</h3><div class="pa-organ">Source: ${esc(y.source)}</div><ol>
+      ${paper.map(([organ, dx, pid, flag]) => {
+        const ans = (KAOGU_ANSWERS[pid] || []).find(a => a.y === y.id && !a.ex);
+        return `<li><b>${esc(organ)}</b> ; ${esc(dx)}${flag ? `<span class="kg-flag">${esc(flag)}</span>` : ""} — <a href="#" data-goto-path="${pid}">card</a>
+          ${ans ? `<details><summary style="cursor:pointer;color:var(--path);font-weight:600">${ansLabel(ans)[0].toUpperCase() + ansLabel(ans).slice(1)}</summary>${gradeHTML(ans)}</details>` : ""}</li>`;
+      }).join("")}</ol></div>`;
+  }
+  html += `<div class="cmp" id="kg-rules"><h3>Grading rules (from the answer sheets)</h3><ul>${KAOGU_RULES.map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>`;
+  html += `<div class="cmp" id="kg-later"><h3>Year 11 second-semester exams (outside Micro I–III — for reference)</h3><p class="intro">Year-11 first-semester Micro 2 and Micro 3 now have their own tabs above.</p>${KAOGU_LATER.map(g => `<p class="label key" style="margin-top:10px">${esc(g.title)}</p><ol>${g.items.map(t => `<li>${esc(t)}</li>`).join("")}</ol>`).join("")}</div>`;
+  $("#kaogu").innerHTML = html;
+  $("#side-kaogu").innerHTML = nav;
+}
+function goTo(tab, id) {
+  $("#search").value = "";
+  renderAtlas(); renderCompare(); renderPath();
+  showTab(tab);
+  requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView());
+}
+document.addEventListener("click", e => {
+  const k = e.target.closest("[data-goto-kaogu]");
+  if (k && k.dataset.kgEx && k.dataset.kgEx !== kgExam) { kgExam = k.dataset.kgEx; store.set("kg-exam", kgExam); renderKaogu(); }
+  if (k) { e.preventDefault(); showTab("kaogu"); requestAnimationFrame(() => document.getElementById(k.dataset.gotoKaogu)?.scrollIntoView()); return; }
+  const a = e.target.closest("[data-goto-path],[data-goto-organ]");
+  if (!a) return;
+  e.preventDefault();
+  if (a.dataset.gotoPath) goTo("path", a.dataset.gotoPath);
+  else goTo("atlas", "o-" + a.dataset.gotoOrgan);
+});
+$("#search").addEventListener("input", () => { renderAtlas(); renderCompare(); renderPath(); });
+document.addEventListener("click", e => {
+  const b = e.target.closest("#path-exam [data-ex]");
+  if (!b || b.dataset.ex === pathExam) return;
+  pathExam = b.dataset.ex; store.set("path-exam", pathExam); renderPath(); window.scrollTo({ top: 0 });
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("#path-kg [data-kg]");
+  if (!b || (b.dataset.kg === "only") === pathKaoguOnly) return;
+  pathKaoguOnly = b.dataset.kg === "only"; store.set("path-kaogu-only", pathKaoguOnly); renderPath(); window.scrollTo({ top: 0 });
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("#path-group [data-pg]");
+  if (!b || b.dataset.pg === pathGroup) return;
+  pathGroup = b.dataset.pg; store.set("path-group", pathGroup); renderPath(); window.scrollTo({ top: 0 });
+});
+document.addEventListener("change", e => {
+  if (e.target.id === "practice-mode") { practiceMode = e.target.checked; PR.set("practiceMode", practiceMode); revealed.clear(); renderPath(); }
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-reveal],[data-pcheck]");
+  if (b) { const id = (b.closest("[data-practice]") || b).dataset.practice || b.dataset.reveal; document.querySelectorAll(`[data-hide-caps="${id}"]`).forEach(el => el.classList.remove("hide-caps")); }
+});
+
+// ── Lightbox ──
+let lb = { organ: null, i: 0 };
+function openLB(organId, i) { lb = { organ: findItem(organId), i }; drawLB(); $("#lb").classList.add("open"); }
+function drawLB() {
+  const [f, cap] = lb.organ.images[lb.i];
+  $("#lb-img").src = src(f, imgDir(lb.organ, lb.organ.images[lb.i]));
+  const secret = practiceMode && lb.organ.answer && !revealed.has(lb.organ.id) && !$("#tab-path").hidden;
+  if (secret) { $("#lb-t").textContent = `Picture ${lb.i + 1}/${lb.organ.images.length} · click image to zoom`; } else
+  $("#lb-t").textContent = `${itemName(lb.organ)} — ${cap}  (${lb.i + 1}/${lb.organ.images.length})  · click image to zoom`;
+  $("#lb-stage").classList.remove("zoom");
+  const multi = lb.organ.images.length > 1;
+  $("#lb-prev").style.visibility = $("#lb-next").style.visibility = multi ? "visible" : "hidden";
+}
+function stepLB(d) { const n = lb.organ.images.length; lb.i = (lb.i + d + n) % n; drawLB(); }
+const closeLB = () => $("#lb").classList.remove("open");
+$("#lb-close").onclick = closeLB;
+$("#lb-prev").onclick = () => stepLB(-1);
+$("#lb-next").onclick = () => stepLB(1);
+$("#lb-img").onclick = () => $("#lb-stage").classList.toggle("zoom");
+$("#lb-stage").onclick = e => { if (e.target.id === "lb-stage") closeLB(); };
+document.addEventListener("click", e => {
+  const t = e.target.closest(".thumb");
+  if (t) { e.stopPropagation(); openLB(t.dataset.organ, +t.dataset.i); }
+});
+
+// ── Flashcards ──
+const fc = {
+  source: store.get("fc-source", "histo"), // "histo" | "path"
+  systems: store.get("fc-systems", SYSTEMS.map(s => s.id)),
+  cats: store.get("fc-cats2", PATH_CATS.map(c => c.id)),
+  kaoguOnly: store.get("fc-kaogu", false),
+  mode: store.get("fc-mode", "name"), // "name" = name → details; "pic" = picture/features → identify
+  hideFamiliar: store.get("fc-hidefam", false),
+  exam: siteExam(store.get("fc-exam", "m1")), // pathology deck: "m1" | "m2" | "m3" | "all"
+  pfilter: store.get("fc-pfilter", "topic"), // pathology deck: pick slides by "topic" or by "organ"
+  organs: store.get("fc-organs", null), // null = all organs
+  typed: null, // what was typed on the front, judged on the back
+  deck: [], pos: 0, flipped: false, known: 0, again: 0, frontImg: 0,
+};
+// New "supplement" category: switch it on once for people whose saved category choice predates it.
+if (!store.get("fc-m23-added", false)) { PATH_CATS.filter(c => c.exam && !fc.cats.includes(c.id)).forEach(c => fc.cats.push(c.id)); store.set("fc-cats2", fc.cats); store.set("fc-m23-added", true); }
+if (!store.get("fc-supp-added", false)) { if (!fc.cats.includes("supp")) fc.cats.push("supp"); store.set("fc-cats2", fc.cats); store.set("fc-supp-added", true); }
+function buildDeck() {
+  const pool = fc.source === "path"
+    ? PATHO.filter(p => inExam(p, fc.exam) && !(fc.mode === "pic" && !quizImages(p).length) && (fc.pfilter === "organ" ? (!fc.organs || fc.organs.includes(organKey(p))) : fc.cats.includes(p.cat)) && (!fc.kaoguOnly || KAOGU_HITS[p.id]) && !(p.supp && fc.mode === "real")).map(p => p.id)
+    : ORGANS.filter(o => fc.systems.includes(o.system)).map(o => o.id);
+  if (fc.hideFamiliar) for (let i = pool.length - 1; i >= 0; i--) if (famOf(pool[i]) === 3) pool.splice(i, 1);
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  Object.assign(fc, { deck: pool, pos: 0, flipped: false, known: 0, again: 0 });
+  pickFrontImg();
+}
+// Pictures shown on a "picture" card front: for pathology only photos of the exam/teaching slide
+// (falling back to all images), for histology every photo of the organ — in lecture/slide order.
+function quizImages(o) {
+  if (!o || !o.images) return [];
+  const idx = o.images.map((im, i) => i);
+  let exam = idx.filter(i => o.images[i][2]);
+  if (!exam.length && o.answer) return []; // pathology card without photos of its own slide (only reference / answer pages) → no picture quiz
+  if (!exam.length) exam = idx;
+  if (o.answer) { // pathology: skip pictures whose annotation gives the organ away ("… → Lung", "Lymph node …")
+    const organWords = new Set(normTokens([o.organ, ...(KAOGU_HITS[o.id] || []).map(h => h.organ || "")].join(" ")).filter(w => w.length > 3));
+    const safe = exam.filter(i => { const cap = o.images[i][1]; return !cap.includes("→") && !normTokens(cap).some(w => organWords.has(w)); });
+    if (safe.length) exam = safe;
+  }
+  return exam;
+}
+function pickFrontImg() { fc.frontImg = 0; } // carousel starts at the first picture
+function carouselHTML(o, dir) {
+  const q = quizImages(o);
+  if (!q.length) return "";
+  const i = Math.min(fc.frontImg, q.length - 1);
+  return `<div class="carousel" id="fc-carousel">
+    <div class="frame"><img id="fc-cimg" src="${src(o.images[q[i]][0], o.images[q[i]][3] || dir)}" alt="Picture ${i + 1}">
+      ${q.length > 1 ? `<button class="nav prev" data-step="-1" aria-label="Previous picture" ${i === 0 ? "disabled" : ""}>‹</button>
+      <button class="nav next" data-step="1" aria-label="Next picture" ${i === q.length - 1 ? "disabled" : ""}>›</button>` : ""}</div>
+    <div class="count" id="fc-ccount">Picture ${i + 1} of ${q.length}${q.length > 1 ? " · ← → to browse" : ""}</div>
+    ${q.length > 1 ? `<div class="dots">${q.map((_, k) => `<button data-go="${k}" class="${k === i ? "on" : ""}" aria-label="Picture ${k + 1}"></button>`).join("")}</div>` : ""}
+  </div>`;
+}
+function stepCarousel(d, abs) {
+  const o = currentOrgan(), q = quizImages(o);
+  if (!q.length || fc.flipped || fc.mode !== "pic") return false;
+  const n = abs != null ? abs : fc.frontImg + d;
+  if (n < 0 || n >= q.length || n === fc.frontImg) return true;
+  fc.frontImg = n;
+  const dir = fc.source === "path" ? PATH_IMG_DIR : IMG_DIR;
+  $("#fc-cimg").src = src(o.images[q[n]][0], o.images[q[n]][3] || dir);
+  $("#fc-ccount").textContent = `Picture ${n + 1} of ${q.length} · ← → to browse`;
+  document.querySelectorAll("#fc-carousel .dots button").forEach((b, k) => b.classList.toggle("on", k === n));
+  $("#fc-carousel .prev").disabled = n === 0;
+  $("#fc-carousel .next").disabled = n === q.length - 1;
+  // warm the next picture so browsing feels instant
+  if (q[n + 1] != null) new Image().src = src(o.images[q[n + 1]][0], o.images[q[n + 1]][3] || dir);
+  return true;
+}
+const currentOrgan = () => fc.deck[fc.pos] && findItem(fc.deck[fc.pos]);
+
+// Typing area on the card front. Organ is never shown on a pathology front — work it out yourself.
+function fcPractice(fields) {
+  const f = {
+    organ: `<label>器官 Organ<input id="fc-p-organ" placeholder="Which organ?" autocomplete="off"></label>`,
+    dx: `<label>診斷 Diagnosis<input id="fc-p-dx" placeholder="Diagnosis" autocomplete="off"></label>`,
+    desc: `<label class="wide">描述 Description<textarea id="fc-p-desc" rows="4" placeholder="1. …&#10;2. …"></textarea></label>`,
+    feat: `<label class="wide">Key features<textarea id="fc-p-desc" rows="3" placeholder="What identifies it?"></textarea></label>`,
+    horgan: `<label class="wide">Organ<input id="fc-p-organ" placeholder="Which organ is this?" autocomplete="off"></label>`,
+  };
+  return `<div class="fc-practice"><div class="pf-grid">${fields.map(k => f[k]).join("")}</div>
+    <div class="pf-actions"><button class="primary" id="fc-check">Check answer</button><span class="vd-note">Enter (or ⌘/Ctrl+Enter in the description) to check · typing is optional — Space flips when you're not typing</span></div></div>`;
+}
+function frontHTML(o) {
+  const hint = t => `<div class="q-hint">${t} · click the card or press Space to reveal</div>`;
+  if (fc.source === "path") {
+    if (fc.mode === "real") { // look at the real glass slide under the microscope — only the slide number is given
+      return `<div class="card front" id="fc-card"><div class="q-sys">🔬 Get this glass slide and look at it under the microscope</div>
+        <div class="q-name" style="font-size:44px;letter-spacing:1px">${esc(o.no)}</div>
+        ${hint("Organ + diagnosis + description?")}${fcPractice(["organ", "dx", "desc"])}</div>`;
+    }
+    if (fc.mode === "pic") {
+      const img = carouselHTML(o, PATH_IMG_DIR);
+      const tip = img ? `<div class="q-hint">Slide annotations may give hints — cover them and try first!</div>` : "";
+      return `<div class="card front" id="fc-card">${img}
+        ${img ? "" : `<ul class="feat">${o.answer.desc.map(f => `<li>${md(f)}</li>`).join("")}</ul>`}${tip}${hint("Organ + diagnosis + description?")}${fcPractice(["organ", "dx", "desc"])}</div>`;
+    }
+    if (ANY_ORGAN[o.id]) // organ isn't implied by the diagnosis → only ask for the description
+      return `<div class="card front" id="fc-card"><div class="q-name">${esc(o.dx)}</div><div class="q-sys">Organ not asked — this diagnosis can appear in different organs</div>${hint("What's the description (描述)?")}${fcPractice(["desc"])}</div>`;
+    return `<div class="card front" id="fc-card"><div class="q-name">${esc(o.dx)}</div>${hint("Which organ, and what's the description (描述)?")}${fcPractice(["organ", "desc"])}</div>`;
+  }
+  if (fc.mode === "pic") return `<div class="card front" id="fc-card">${carouselHTML(o, IMG_DIR)}${hint("Which organ is this?")}${fcPractice(["horgan"])}</div>`;
+  return `<div class="card front" id="fc-card"><div class="q-name">${esc(o.name)}</div><div class="q-sys">${esc(sysName(o.system))}</div>${hint("Recall the key features & differentials")}${fcPractice(["feat"])}</div>`;
+}
+function backHTML(o) {
+  const t = fc.typed;
+  const typedAny = t && Object.values(t).some(v => v != null && String(v).trim());
+  const result = typedAny ? `<div class="practice hl-skip" style="cursor:default"><p class="label key" style="margin:0">Your answer</p>${resultHTML(o, t)}</div>` : "";
+  const head = fc.source === "path"
+    ? `<h2>${esc(o.dx)}<span class="pa-no">${esc(o.no)}</span></h2><div class="q-sys">${esc(o.organ)} · ${esc(catName(o.cat))} · <a href="#" data-goto-path="${o.id}">open in pathology</a></div>${pathBody(o)}`
+    : `<h2>${esc(o.name)}</h2><div class="q-sys">${esc(sysName(o.system))} · <a href="#" data-goto-organ="${o.id}">open in histology atlas</a></div>${organBody(o)}`;
+  return `<div class="card back" data-hl-scope="${o.id}">${result}${famPicker(o.id)}${head}</div>
+    <div class="fc-actions"><button class="again" id="fc-again">✗ Again (1)</button><button class="good" id="fc-good">✓ Got it (2)</button></div>`;
+}
+
+function renderCard() {
+  const isPath = fc.source === "path";
+  const orgOn = k => !fc.organs || fc.organs.includes(k);
+  const chips = isPath
+    ? `<span class="seg" id="fc-pfilter" style="margin-right:6px"><button data-pf="topic" class="${fc.pfilter === "topic" ? "on" : ""}">By topic</button><button data-pf="organ" class="${fc.pfilter === "organ" ? "on" : ""}">By organ</button></span>`
+      + (fc.pfilter === "organ"
+        ? pathOrganList(PATHO.filter(p => inExam(p, fc.exam))).map(o => `<button class="chip ${orgOn(o.key) ? "on" : ""}" data-org="${o.key}">${esc(o.label.replace(/ \(.*\)$/, ""))}</button>`).join("")
+        : PATH_CATS.filter(c => inExam({ exam: catExam(c) }, fc.exam)).map(c => `<button class="chip ${fc.cats.includes(c.id) ? "on" : ""}" data-cat="${c.id}">${esc(c.name)}</button>`).join(""))
+      + `<button class="chip" id="fc-all">All</button><button class="chip ${fc.kaoguOnly ? "on" : ""}" id="fc-kaogu">考古 only</button><button class="chip ${fc.hideFamiliar ? "on" : ""}" id="fc-hidefam">Skip ✅ familiar</button>`
+    : SYSTEMS.map(s => `<button class="chip ${fc.systems.includes(s.id) ? "on" : ""}" data-sys="${s.id}">${esc(s.name)}</button>`).join("") + `<button class="chip" id="fc-all">All</button><button class="chip" id="fc-gi">GI only</button><button class="chip ${fc.hideFamiliar ? "on" : ""}" id="fc-hidefam">Skip ✅ familiar</button>`;
+  const modes = isPath ? ["Diagnosis → description", "Slide photo → diagnosis", "🔬 Glass slide (microscope)"] : ["Name → features", "Picture → identify"];
+  if (!isPath && fc.mode === "real") fc.mode = "name"; // microscope mode only exists for the pathology deck
+  const o = currentOrgan();
+  const total = fc.deck.length, done = Math.min(fc.pos, total);
+  let card;
+  if (!total) card = `<div class="card front"><div class="q-hint">${isPath && fc.mode === "pic" && PATHO.some(p => inExam(p, fc.exam) && !p.images.length) ? "No slide photos added yet for this selection — try “Diagnosis → description” or 🔬 Glass slide mode, or pick another group." : "Pick at least one group above."}</div></div>`;
+  else if (!o) card = `<div class="card front"><div class="q-name">Deck done 🎉</div>
+      <div class="q-sys">${fc.known} got it · ${fc.again} to review again</div>
+      <div class="fc-actions"><button class="primary" id="fc-restart">Shuffle new deck</button></div></div>`;
+  else card = fc.flipped ? backHTML(o) : frontHTML(o);
+
+  $("#cards").innerHTML = `
+    <div class="fc-bar" style="justify-content:flex-start"><span class="seg" id="fc-src"><button data-src="histo" class="${isPath ? "" : "on"}">Histology deck</button><button data-src="path" class="${isPath ? "on" : ""}">Pathology exam deck</button></span>${isPath ? `<span style="margin-left:8px">${examSeg("fc-exam", fc.exam)}</span>` : ""}</div>
+    <div class="fc-controls">${chips}</div>
+    <div class="fc-bar">
+      <span class="seg" id="fc-mode"><button data-mode="name" class="${fc.mode === "name" ? "on" : ""}">${modes[0]}</button><button data-mode="pic" class="${fc.mode === "pic" ? "on" : ""}">${modes[1]}</button>${isPath ? `<button data-mode="real" class="${fc.mode === "real" ? "on" : ""}">${modes[2]}</button>` : ""}</span>
+      <span>Card ${Math.min(fc.pos + 1, total)} / ${total} · ✓ ${fc.known} · ✗ ${fc.again}</span>
+      <div class="progress"><div style="width:${total ? done / total * 100 : 0}%"></div></div>
+      <button class="icon-btn" id="fc-shuffle">⟲ Reshuffle</button>
+    </div>
+    ${card}
+    <div class="kbd">${fc.mode === "pic" && !fc.flipped ? "← → = browse pictures · Space = flip · S = skip" : "Space = flip · 1 = again · 2 = got it · S or → = skip"}</div>`;
+
+  const rebuild = () => { buildDeck(); renderCard(); };
+  document.querySelectorAll("#fc-src button").forEach(b => b.onclick = () => { fc.source = b.dataset.src; store.set("fc-source", fc.source); rebuild(); });
+  document.querySelectorAll("#cards .chip[data-sys]").forEach(b => b.onclick = () => {
+    const id = b.dataset.sys;
+    fc.systems = fc.systems.includes(id) ? fc.systems.filter(x => x !== id) : [...fc.systems, id];
+    store.set("fc-systems", fc.systems); rebuild();
+  });
+  document.querySelectorAll("#cards .chip[data-cat]").forEach(b => b.onclick = () => {
+    const id = b.dataset.cat;
+    fc.cats = fc.cats.includes(id) ? fc.cats.filter(x => x !== id) : [...fc.cats, id];
+    store.set("fc-cats2", fc.cats); rebuild();
+  });
+  $("#fc-all").onclick = () => {
+    if (isPath && fc.pfilter === "organ") { fc.organs = null; store.set("fc-organs", null); }
+    else if (isPath) { fc.cats = PATH_CATS.map(c => c.id); store.set("fc-cats2", fc.cats); }
+    else { fc.systems = SYSTEMS.map(s => s.id); store.set("fc-systems", fc.systems); }
+    rebuild();
+  };
+  document.querySelectorAll("#fc-exam [data-ex]").forEach(b => b.onclick = () => { fc.exam = b.dataset.ex; store.set("fc-exam", fc.exam); rebuild(); });
+  document.querySelectorAll("#fc-pfilter button").forEach(b => b.onclick = () => { fc.pfilter = b.dataset.pf; store.set("fc-pfilter", fc.pfilter); rebuild(); });
+  document.querySelectorAll("#cards .chip[data-org]").forEach(b => b.onclick = () => {
+    const k = b.dataset.org, all = pathOrganList(PATHO.filter(p => inExam(p, fc.exam))).map(o => o.key), cur = fc.organs || all;
+    fc.organs = cur.includes(k) ? cur.filter(x => x !== k) : [...cur, k];
+    if (fc.organs.length === all.length) fc.organs = null;
+    store.set("fc-organs", fc.organs); rebuild();
+  });
+  $("#fc-hidefam").onclick = () => { fc.hideFamiliar = !fc.hideFamiliar; store.set("fc-hidefam", fc.hideFamiliar); rebuild(); };
+  $("#fc-check") && ($("#fc-check").onclick = e => { e.stopPropagation(); flip(); });
+  document.querySelectorAll(".fc-practice input, .fc-practice textarea").forEach(el => el.addEventListener("keydown", e => {
+    if (e.key === "Enter" && (el.tagName === "INPUT" || e.metaKey || e.ctrlKey)) { e.preventDefault(); flip(); }
+  }));
+  $("#fc-kaogu") && ($("#fc-kaogu").onclick = () => { fc.kaoguOnly = !fc.kaoguOnly; store.set("fc-kaogu", fc.kaoguOnly); rebuild(); });
+  $("#fc-gi") && ($("#fc-gi").onclick = () => { fc.systems = ["gi", "gi-glands"]; store.set("fc-systems", fc.systems); rebuild(); });
+  document.querySelectorAll("#fc-mode button").forEach(b => b.onclick = () => {
+    const was = fc.mode; fc.mode = b.dataset.mode; store.set("fc-mode", fc.mode); fc.flipped = false;
+    was !== fc.mode ? rebuild() : renderCard(); // microscope mode has no supplement cards; photo mode skips slides without photos
+  });
+  $("#fc-shuffle").onclick = rebuild;
+  $("#fc-card") && ($("#fc-card").onclick = e => {
+    if (e.target.closest(".fc-practice")) return; // typing area: don't flip
+    const b = e.target.closest("#fc-carousel button");
+    if (b) { e.stopPropagation(); b.dataset.step ? stepCarousel(+b.dataset.step) : stepCarousel(0, +b.dataset.go); return; }
+    flip();
+  });
+  $("#fc-again") && ($("#fc-again").onclick = () => answer(false));
+  $("#fc-good") && ($("#fc-good").onclick = () => answer(true));
+  $("#fc-restart") && ($("#fc-restart").onclick = rebuild);
+}
+function flip() {
+  if (!currentOrgan()) return;
+  if (!fc.flipped) { // capture what was typed on the front
+    const v = id => { const el = document.getElementById(id); return el ? el.value : null; };
+    fc.typed = { organ: v("fc-p-organ"), dx: v("fc-p-dx"), desc: v("fc-p-desc") };
+  }
+  fc.flipped = !fc.flipped; renderCard();
+}
+function answer(ok) {
+  if (!currentOrgan()) return;
+  if (ok) fc.known++;
+  else { fc.again++; fc.deck.splice(Math.min(fc.pos + 4 + Math.floor(Math.random() * 4), fc.deck.length), 0, fc.deck[fc.pos]); }
+  next();
+}
+function next() { fc.pos++; fc.flipped = false; fc.typed = null; pickFrontImg(); renderCard(); window.scrollTo({ top: 0 }); }
+
+document.addEventListener("keydown", e => {
+  if ($("#lb").classList.contains("open")) {
+    if (e.key === "Escape") closeLB();
+    if (e.key === "ArrowLeft") stepLB(-1);
+    if (e.key === "ArrowRight") stepLB(1);
+    return;
+  }
+  if ($("#tab-cards").hidden || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+  if (e.key === " ") { e.preventDefault(); document.activeElement?.blur(); flip(); }
+  else if (e.key === "1" && fc.flipped) answer(false);
+  else if (e.key === "2" && fc.flipped) answer(true);
+  else if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && stepCarousel(e.key === "ArrowRight" ? 1 : -1)) e.preventDefault();
+  else if ((e.key === "ArrowRight" || e.key.toLowerCase() === "s") && currentOrgan()) next();
+});
+
+// Space on a focused button would otherwise "click" it on keyup.
+document.addEventListener("keyup", e => {
+  if (e.key === " " && !$("#tab-cards").hidden && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") e.preventDefault();
+});
+
+// ── Init ──
+// Year-09 past-exam slide photos: answer pages (with the grading table) are not quiz pictures.
+PATHO.forEach(p => (KAOGU_IMAGES[p.id] || []).forEach(([f, cap]) =>
+  p.images.push([f, cap, /Answer/.test(cap) ? 0 : 2, KAOGU_IMG_DIR, "09"])));
+renderAtlas();
+renderCompare();
+renderPath();
+renderKaogu();
+buildDeck();
+showTab(store.get("tab", "atlas"));
+</script>
+</body>
+</html>
